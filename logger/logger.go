@@ -15,6 +15,7 @@ import (
 )
 
 // HandleError xử lý lỗi với ghi log, gửi Telegram, và Sentry
+// HandleError xử lý lỗi với ghi log, gửi Telegram, và Sentry
 func HandleError(err error, errorType, message string, config Config) {
 	// Tạo thông điệp lỗi chi tiết
 	errorMsg := fmt.Sprintf("🛑 *LỖI HỆ THỐNG*\n\n📅 %s\n🌍 Môi trường: %s\n📍 *Loại*: %s\n💥 *Lỗi*: %s\n🔍 *Chi tiết*: %v",
@@ -40,13 +41,11 @@ func HandleError(err error, errorType, message string, config Config) {
 		}
 		logFile := filepath.Join(logDir, fmt.Sprintf("error_%s.log", time.Now().Format("2006-01-02")))
 
-		// Tạo thư mục logs nếu chưa tồn tại
 		if err := os.MkdirAll(logDir, 0755); err != nil {
 			log.Printf("❌ Không thể tạo thư mục logs: %v", err)
 			return
 		}
 
-		// Mở hoặc tạo file log
 		f, err := os.OpenFile(logFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 		if err != nil {
 			log.Printf("❌ Không thể mở file log: %v", err)
@@ -54,7 +53,6 @@ func HandleError(err error, errorType, message string, config Config) {
 		}
 		defer f.Close()
 
-		// Ghi lỗi vào file với định dạng JSON
 		logEntry := map[string]interface{}{
 			"timestamp":  time.Now().Format("2006-01-02 15:04:05"),
 			"env":        config.Environment,
@@ -100,11 +98,6 @@ func HandleError(err error, errorType, message string, config Config) {
 		defer wg.Done()
 		if config.SentryDSN == "" {
 			log.Println("❌ Thiếu SentryDSN")
-			return
-		}
-		// Kiểm tra xem Sentry đã được khởi tạo chưa
-		if !sentry.IsInitialized() {
-			log.Println("❌ Sentry chưa được khởi tạo")
 			return
 		}
 		sentry.CaptureMessage(errorMsg)
