@@ -20,16 +20,17 @@ The `logger` package provides `HandleError` to handle errors with file logging, 
 import "github.com/dongocquy/bingoai-utils/logger"
 
 func main() {
-    config := logger.Config{
-        LogDir:         "logs",
-        SentryDSN:      "your_sentry_dsn",
-        TelegramToken:  "your_telegram_token",
-        TelegramChatID: "your_chat_id",
-        Environment:    "production",
+    // LoggerConfig là cấu hình logger dùng chung
+    var LoggerConfig = logger.Config{
+        LogDir:         os.Getenv("LOG_DIR", "logs"),
+        SentryDSN:      os.Getenv("SENTRY_DSN"),
+        TelegramToken:  os.Getenv("TELEGRAM_BOT_TOKEN"),
+        TelegramChatID: os.Getenv("TELEGRAM_ADMIN_ID"),
+        Environment:    os.Getenv("APP_ENV", "development"),
         Fatal:          false,
     }
     err := errors.New("test error")
-    logger.HandleError(err, "Test", "Lỗi thử nghiệm", config)
+    logger.HandleError(err, "Test", "Lỗi thử nghiệm", LoggerConfig)
 }
 ```
 
