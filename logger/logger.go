@@ -11,7 +11,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/getsentry/sentry-go"
+	"github.com/gofiber/fiber/v2"
 )
 
 // Config chứa cấu hình cho HandleError
@@ -24,11 +24,8 @@ type Config struct {
 	Fatal          bool
 }
 
-// SentryInitialized là biến toàn cục theo dõi trạng thái khởi tạo Sentry
-var SentryInitialized bool
-
 // HandleError xử lý lỗi với ghi log, gửi Telegram, và Sentry
-func HandleError(err error, errorType, message string, config Config) {
+func HandleError(err error, errorType, message string, config Config, c *fiber.Ctx) {
 	// Tạo thông điệp lỗi chi tiết
 	errorMsg := fmt.Sprintf("🛑 *LỖI HỆ THỐNG*\n\n📅 %s\n🌍 Môi trường: %s\n📍 *Loại*: %s\n💥 *Lỗi*: %s\n🔍 *Chi tiết*: %v",
 		time.Now().Format("2006-01-02 15:04:05"),
@@ -66,7 +63,12 @@ func HandleError(err error, errorType, message string, config Config) {
 		defer f.Close()
 
 		// Xử lý trường hợp err là nil
-		errorStr := "No error provided"
+		errorStr := ""
+		if err != nil {
+			errorStr = err.Error()
+		} else {
+			errorStr = "No error provided"
+		}
 
 		// Ghi lỗi vào file với định dạng JSON
 		logEntry := map[string]interface{}{
@@ -116,12 +118,7 @@ func HandleError(err error, errorType, message string, config Config) {
 			log.Println("❌ Thiếu SentryDSN")
 			return
 		}
-		if !SentryInitialized {
-			log.Println("❌ Sentry chưa được khởi tạo")
-			return
-		}
-		sentry.CaptureMessage(errorMsg)
-		log.Println("✅ Đã gửi lỗi đến Sentry")
+		SendToSentry(c, message, err, errorType)
 	}()
 
 	// Đợi tất cả goroutines hoàn thành
