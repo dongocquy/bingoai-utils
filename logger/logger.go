@@ -14,7 +14,19 @@ import (
 	"github.com/getsentry/sentry-go"
 )
 
-// HandleError xử lý lỗi với ghi log, gửi Telegram, và Sentry
+// Config chứa cấu hình cho HandleError
+type Config struct {
+	LogDir         string
+	SentryDSN      string
+	TelegramToken  string
+	TelegramChatID string
+	Environment    string
+	Fatal          bool
+}
+
+// SentryInitialized là biến toàn cục theo dõi trạng thái khởi tạo Sentry
+var SentryInitialized bool
+
 // HandleError xử lý lỗi với ghi log, gửi Telegram, và Sentry
 func HandleError(err error, errorType, message string, config Config) {
 	// Tạo thông điệp lỗi chi tiết
@@ -53,12 +65,16 @@ func HandleError(err error, errorType, message string, config Config) {
 		}
 		defer f.Close()
 
+		// Xử lý trường hợp err là nil
+		errorStr := "No error provided"
+
+		// Ghi lỗi vào file với định dạng JSON
 		logEntry := map[string]interface{}{
 			"timestamp":  time.Now().Format("2006-01-02 15:04:05"),
 			"env":        config.Environment,
 			"error_type": errorType,
 			"message":    message,
-			"error":      err.Error(),
+			"error":      errorStr,
 		}
 		logData, _ := json.Marshal(logEntry)
 		if _, err := f.WriteString(string(logData) + "\n"); err != nil {
@@ -98,6 +114,10 @@ func HandleError(err error, errorType, message string, config Config) {
 		defer wg.Done()
 		if config.SentryDSN == "" {
 			log.Println("❌ Thiếu SentryDSN")
+			return
+		}
+		if !SentryInitialized {
+			log.Println("❌ Sentry chưa được khởi tạo")
 			return
 		}
 		sentry.CaptureMessage(errorMsg)
