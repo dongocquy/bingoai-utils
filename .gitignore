@@ -1,0 +1,40 @@
+# File nhị phân và file thực thi
+*.exe
+*.exe~
+*.out
+
+# Thư mục build và cache của Go
+/bin/
+/pkg/
+/vendor/
+
+# File tạm và log
+*.log
+*.tmp
+*.swp
+*.xlsx
+*.xls
+# File cấu hình môi trường chứa thông tin nhạy cảm
+.env
+*.env
+secrets.json
+*.json
+# File Go module cache
+/go.sum
+
+# File IDE và editor
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# File hệ thống
+.DS_Store
+Thumbs.db
+
+# File không cần commit khác
+*.bak
+*.gho
+*.orig
+.idx
+.vscode
