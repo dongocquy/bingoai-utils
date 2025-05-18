@@ -102,7 +102,11 @@ func HandleError(err error, errorType, message string, config Config) {
 			log.Println("❌ Thiếu SentryDSN")
 			return
 		}
-		// Giả sử Sentry đã được khởi tạo, chỉ gửi thông điệp
+		// Kiểm tra xem Sentry đã được khởi tạo chưa
+		if !sentry.IsInitialized() {
+			log.Println("❌ Sentry chưa được khởi tạo")
+			return
+		}
 		sentry.CaptureMessage(errorMsg)
 		log.Println("✅ Đã gửi lỗi đến Sentry")
 	}()
