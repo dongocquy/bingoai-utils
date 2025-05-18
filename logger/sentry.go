@@ -9,15 +9,9 @@ import (
 )
 
 // SentryInitialized theo dõi trạng thái khởi tạo Sentry
-var SentryInitialized bool
 
 // SendToSentry gửi thông điệp hoặc lỗi tới Sentry
 func SendToSentry(c *fiber.Ctx, message string, err error, errorType string) {
-	if !SentryInitialized {
-		log.Println("❌ Sentry chưa được khởi tạo, bỏ qua gửi sự kiện")
-		return
-	}
-
 	// Lấy hub từ context Fiber hoặc hub mặc định
 	var hub *sentry.Hub
 	if c != nil {
